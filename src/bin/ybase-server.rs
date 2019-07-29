@@ -1,8 +1,10 @@
-use ybase::nexus::entry::YBaseEngine;
-use ybase::storage::fixmap::engine::FixMapStorageEngine;
+use ybase::{
+    nexus::entry::{YBaseEngine},
+    storage::fixmap::engine::FixMapStorageEngine
+};
 
 fn main() {
-    println!("Hello, rust!");
-    let engine = YBaseEngine{engine: Box::new(FixMapStorageEngine::new(4 * 1024 * 1024))};
+    info!("starting YBase now...");
+    let engine = YBaseEngine{engine: Box::new(FixMapStorageEngine::new(std::path::PathBuf::from(""))};
     engine.run();
 }
