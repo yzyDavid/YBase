@@ -14,6 +14,15 @@ pub struct FixMapConfig {
     root_dir: path::PathBuf,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+struct Schema {
+
+}
+
+struct Meta {
+
+}
+
 pub struct FixMapStorageEngine {
     config: FixMapConfig,
 }
