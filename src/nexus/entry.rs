@@ -1,9 +1,12 @@
 use crate::storage::storage_engine::StorageEngine;
 
 pub struct YBaseEngine {
-    pub engine: Box<dyn StorageEngine>
+    pub storage_engine: Box<dyn StorageEngine>
 }
 
 impl YBaseEngine {
+    pub fn new(storage_engine: Box<dyn StorageEngine>) -> Self {
+        Self { storage_engine }
+    }
     pub fn run(&self) {}
 }

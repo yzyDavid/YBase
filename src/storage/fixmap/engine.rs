@@ -1,5 +1,5 @@
 use crate::storage::storage_engine::StorageEngine;
-use crate::error::Result;
+use crate::error::{Result, RuntimeError};
 
 extern crate serde;
 
@@ -7,10 +7,9 @@ use serde::{Serialize, Deserialize};
 use serde_json;
 
 use std::path;
-use std::error::Error;
 
 #[derive(Serialize, Deserialize, Debug)]
-struct FixMapConfig {
+pub struct FixMapConfig {
     page_size: u64,
     root_dir: path::PathBuf,
 }
@@ -20,16 +19,16 @@ pub struct FixMapStorageEngine {
 }
 
 impl FixMapStorageEngine {
-    pub fn new(config_path: path::PathBuf) -> Result<Self> {
-        let config = Self::parse_config(config_path)?;
-        Ok(FixMapStorageEngine { config })
+    pub fn new(config: FixMapConfig) -> Self {
+        FixMapStorageEngine { config }
     }
 
     fn alloc_page(&self) {}
 
-    fn parse_config(config_path: path::PathBuf) -> Result<FixMapConfig> {
+    pub fn parse_config(config_path: path::PathBuf) -> Result<FixMapConfig> {
         let content = std::fs::read_to_string(config_path)?;
-        let config = serde_json::from_str(content.as_str())?;
+        let config: FixMapConfig = serde_json::from_str(&content)?;
+        Ok(config)
     }
 }
 
