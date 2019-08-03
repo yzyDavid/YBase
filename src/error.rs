@@ -1,6 +1,12 @@
 #[derive(Debug)]
 pub struct RuntimeError(String);
 
+impl RuntimeError {
+    pub fn new(msg: &str) -> Self {
+        RuntimeError { 0: String::from(msg) }
+    }
+}
+
 impl std::error::Error for RuntimeError {}
 
 impl std::fmt::Display for RuntimeError {

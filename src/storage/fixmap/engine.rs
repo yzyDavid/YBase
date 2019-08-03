@@ -6,53 +6,67 @@ extern crate uuid;
 extern crate nix;
 
 use uuid::Uuid;
-use nix::libc;
+
 
 use serde::{Serialize, Deserialize};
 use serde_json;
 
 use std::path;
 use crate::nexus::value::Value;
+use std::collections::HashMap;
+use std::thread::current;
 use std::path::PathBuf;
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct FixMapConfig {
+#[serde(deny_unknown_fields)]
+struct FieldDef {
+    name: String,
+    value_type: String
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct Schema {
+    fields: Vec<FieldDef>
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct Meta {
+    table_name: String,
+    schema: Schema,
     page_size: u64,
     root_dir: path::PathBuf,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(deny_unknown_fields)]
-struct Schema {
-    fields: Vec<String>
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(deny_unknown_fields)]
-struct Meta {
-    table_name: String,
     pages: Vec<String>,
 }
 
 pub struct FixMapStorageEngine {
-    config: FixMapConfig,
+    meta: Meta,
 }
 
 impl FixMapStorageEngine {
-    pub fn new(config: FixMapConfig) -> Self {
-        FixMapStorageEngine { config }
+    pub fn new(meta: Meta) -> Self {
+        FixMapStorageEngine { meta }
     }
 
-    fn alloc_page(&self) {
+    fn init(&mut self) {}
+
+    fn alloc_page(&mut self) -> Result<()> {
         let page_name = Uuid::new_v4().to_hyphenated().to_string() + ".page";
-        let mut page_path = self.config.root_dir.clone();
+        self.meta.pages.push(page_name.clone());
+        let mut page_path = self.meta.root_dir.clone();
         page_path.push(page_name);
+        Ok(())
     }
 
-    pub fn parse_config(config_path: path::PathBuf) -> Result<FixMapConfig> {
-        let content = std::fs::read_to_string(config_path)?;
-        let config: FixMapConfig = serde_json::from_str(&content)?;
-        Ok(config)
+    fn mmap_file(&mut self, file: &PathBuf) {}
+
+    pub fn parse_meta(meta_file: path::PathBuf) -> Result<Meta> {
+        let content = std::fs::read_to_string(meta_file)?;
+        let meta: Meta = serde_json::from_str(&content)?;
+        // TODO: check fields legal
+
+        Ok(meta)
     }
 }
 
@@ -61,7 +75,7 @@ impl StorageEngine for FixMapStorageEngine {
         String::from("FixMapStorageEngine")
     }
 
-    fn insert(&self, v: Value) -> Result<()> {
+    fn insert(&self, _v: Value) -> Result<()> {
         unimplemented!()
     }
 }

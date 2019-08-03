@@ -1,0 +1,14 @@
+{
+  "table_name": "table1",
+  "schema": {
+    "fields": [
+      {
+        "name": "field1",
+        "value_type": "Int"
+      }
+    ]
+  },
+  "page_size": 4096,
+  "root_dir": "./data_dir",
+  "pages": []
+}
