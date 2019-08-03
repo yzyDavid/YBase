@@ -15,7 +15,7 @@ fn main() -> Result<()> {
     let meta_path = std::path::PathBuf::from("./meta.json");
     let meta = FixMapStorageEngine::parse_meta(meta_path.clone())?;
     let storage_engine = Box::from(FixMapStorageEngine::new(meta_path, meta));
-    let engine = YBaseEngine::new(storage_engine);
+    let mut engine = YBaseEngine::new(storage_engine);
     info!("init Ok, running...");
     engine.run();
     Ok(())

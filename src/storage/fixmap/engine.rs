@@ -53,15 +53,6 @@ impl FixMapStorageEngine {
         FixMapStorageEngine { meta_path, meta, context: RuntimeContext {} }
     }
 
-    fn init(&mut self) {
-        info!("start init");
-        for page in self.meta.pages.clone().iter() {
-            let mut page_path = self.meta.root_dir.clone();
-            page_path.push(page);
-            self.mmap_file(&page_path);
-        }
-    }
-
     fn alloc_page(&mut self) -> Result<()> {
         let page_name = Uuid::new_v4().to_hyphenated().to_string() + ".page";
         info!("allocating page with name: [{}]", &page_name);
@@ -92,6 +83,15 @@ impl FixMapStorageEngine {
 impl StorageEngine for FixMapStorageEngine {
     fn name(&self) -> String {
         String::from("FixMapStorageEngine")
+    }
+
+    fn init(&mut self) {
+        info!("start init");
+        for page in self.meta.pages.clone().iter() {
+            let mut page_path = self.meta.root_dir.clone();
+            page_path.push(page);
+            self.mmap_file(&page_path);
+        }
     }
 
     fn insert(&self, _v: Value) -> Result<()> {
