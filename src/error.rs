@@ -28,3 +28,15 @@ impl From<serde_json::Error> for RuntimeError {
         RuntimeError(err.to_string())
     }
 }
+
+impl From<std::ffi::NulError> for RuntimeError {
+    fn from(err: std::ffi::NulError) -> Self {
+        RuntimeError(err.to_string())
+    }
+}
+
+impl From<std::ffi::OsString> for RuntimeError {
+    fn from(os_string: std::ffi::OsString) -> Self {
+        RuntimeError(String::from("convert to c string failed!"))
+    }
+}

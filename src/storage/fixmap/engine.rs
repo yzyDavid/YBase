@@ -7,7 +7,6 @@ extern crate nix;
 
 use uuid::Uuid;
 
-
 use serde::{Serialize, Deserialize};
 use serde_json;
 use log::info;
@@ -35,12 +34,14 @@ pub struct Schema {
 pub struct Meta {
     table_name: String,
     schema: Schema,
-    page_size: u64,
+    page_size: usize,
     root_dir: path::PathBuf,
     pages: Vec<String>,
 }
 
-struct RuntimeContext {}
+struct RuntimeContext {
+    //maps: HashMap<String, ()>
+}
 
 pub struct FixMapStorageEngine {
     meta_path: PathBuf,
@@ -63,8 +64,22 @@ impl FixMapStorageEngine {
         Ok(())
     }
 
-    fn mmap_file(&mut self, file: &PathBuf) {
+    fn mmap_file(&mut self, file: &PathBuf) -> Result<()> {
         info!("mmap file: [{:?}]", &file);
+        std::fs::OpenOptions::new().append(true).create(true).open(file)?;  // touch it
+        let file_name = file.clone().into_os_string().into_string()?;
+        let c_name = std::ffi::CString::new(file_name.as_str())?;
+        let fd = unsafe { nix::libc::open(c_name.as_ptr(), nix::libc::O_RDWR) };
+        if fd == -1 {
+            return Err(RuntimeError::new("open() failed!"));
+        }
+        let addr: *mut std::ffi::c_void = unsafe {
+            nix::libc::mmap(std::ptr::null_mut(), self.meta.page_size, nix::libc::PROT_READ | nix::libc::PROT_WRITE, nix::libc::MAP_SHARED, fd, 0)
+        };
+        if addr as isize == 1 {
+            return Err(RuntimeError::new("mmap() failed!"));
+        }
+        Ok(())
     }
 
     pub fn parse_meta(meta_file: path::PathBuf) -> Result<Meta> {
